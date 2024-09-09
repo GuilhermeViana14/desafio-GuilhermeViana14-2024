@@ -81,4 +81,13 @@ describe('Recintos do Zoologico', () => {
         expect(resultado.recintosViaveis[0]).toBe('Recinto 2 (espaço livre: 0 total: 5)');
 
     });
+
+
+    test('Deve dar erro ao colocar O hipopotamo junto com outras especies sem ser savana e rio', () => {
+        const resultado = new RecintosZoo().analisaRecintos('HIPOPOTAMO', 1, 1);
+        expect(resultado.recintosViaveis).toBeFalsy();
+        expect(resultado.recintosViaveis.length).toBe(1); 
+        expect(resultado.recintosViaveis[0]).toBe('Recinto 1 (espaço livre: 3 total: 10)');
+
+    });
 });
