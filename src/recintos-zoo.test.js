@@ -1,4 +1,4 @@
-const { RecintosZoo } = require('../src/recintos-zoo.js');
+import { RecintosZoo } from '../src/recintos-zoo.js';
 
 describe('Recintos do Zoologico', () => {
     

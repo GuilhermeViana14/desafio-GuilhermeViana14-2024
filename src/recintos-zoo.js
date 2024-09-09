@@ -41,54 +41,59 @@ class RecintosZoo {
 
     getRecintosViaveis(animal, quantidade) {
         const espacoAnimal = this.tamanhoAnimal(animal);
+        const isCarnivoro = this.AnimalCarnivoro(animal);
+    
         const recintosViaveis = this.recintos
             .filter(recinto => {
                 if (!this.biomaAdequado(animal, recinto.bioma)) {
                     return false;
                 }
-
+    
                 const espacoOcupado = recinto.animais.reduce((total, a) => total + (a.quantidade * a.tamanho), 0);
                 const espacoNecessario = quantidade * espacoAnimal;
                 const espacoLivre = recinto.tamanho - espacoOcupado;
-
+    
                 if (espacoLivre < espacoNecessario) {
                     return false;
                 }
-
+    
                 const existeCarnivoro = recinto.animais.some(a => this.AnimalCarnivoro(a.especie));
-                const isCarnivoro = this.AnimalCarnivoro(animal);
-
+                const existeHerbivoro = recinto.animais.some(a => !this.AnimalCarnivoro(a.especie));
+    
+                // Verifica se há incompatibilidade entre herbívoros e carnívoros
+                if (isCarnivoro && existeHerbivoro) {
+                    return false;
+                }
+    
+                if (!isCarnivoro && existeCarnivoro) {
+                    return false;
+                }
+    
                 // Permite carnívoros da mesma espécie no mesmo recinto
                 if (isCarnivoro) {
                     const mesmaEspecie = recinto.animais.some(a => a.especie === animal);
                     if (existeCarnivoro && !mesmaEspecie) {
                         return false;
                     }
-                } else {
-                    // Herbívoros não podem estar no mesmo recinto que carnívoros
-                    if (existeCarnivoro) {
-                        return false;
-                    }
                 }
-
+    
                 return true;
             })
             .map(recinto => {
                 const espacoOcupado = recinto.animais.reduce((total, a) => total + (a.quantidade * a.tamanho), 0);
                 const espacoNecessario = quantidade * espacoAnimal;
                 const espacoLivre = recinto.tamanho - espacoOcupado - espacoNecessario;
-
+    
                 return { numero: recinto.numero, espacoLivre };
             });
-
+    
         if (recintosViaveis.length === 0) {
             return "Não há recinto viável para alocar o animal.";
         }
-
+    
         return recintosViaveis
             .map(r => `Recinto ${r.numero} (espaço livre: ${r.espacoLivre} total: ${this.recintos.find(re => re.numero === r.numero).tamanho})`);
     }
-
     analisaRecintos(animal, quantidade, recintoEscolhido = null) {
         animal = animal.toUpperCase();
 
@@ -167,4 +172,4 @@ class RecintosZoo {
     }
 }
 
-export { RecintosZoo };
+export { RecintosZoo as RecintosZoo };
