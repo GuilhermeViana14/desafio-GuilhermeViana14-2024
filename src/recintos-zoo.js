@@ -67,6 +67,16 @@ analisaRecintos(animal, quantidade) {
             return (recinto.tamanho - espacoOcupado) >= espacoNecessario;
         })
 
+        .map(recinto => {
+
+            const espacoOcupado = recinto.animais.reduce((total, a) => total + (a.quantidade * a.tamanho), 0);
+            const espacoLivre = recinto.tamanho - espacoOcupado - (quantidade * this.tamanhoAnimal(animal));
+
+            return `Recinto ${recinto.numero} (espaço livre: ${espacoLivre} total: ${recinto.tamanho})`;
+        })
+
+}
+
 }
 
 export { RecintosZoo as RecintosZoo };
