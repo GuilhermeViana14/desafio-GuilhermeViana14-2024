@@ -14,15 +14,20 @@ class RecintosZoo {
 
          ]
     
-        this.animaisPermitidos = {
-            'LEAO': { tamanho: 3, biomas: ['savana'] },
-            'LEOPARDO': { tamanho: 2, biomas: ['savana'] },
-            'CROCODILO': { tamanho: 3, biomas: ['rio'] },
-            'MACACO': { tamanho: 1, biomas: ['savana', 'floresta'] },
-            'GAZELA': { tamanho: 2, biomas: ['savana'] },
-            'HIPOPOTAMO': { tamanho: 4, biomas: ['savana', 'rio'] },
+    }
+
+
+    // Adiciona função para verificar biomas
+    biomasAdequados(animal) {
+        const mapaBiomas = {
+            'LEAO': ['savana'],
+            'LEOPARDO': ['savana'],
+            'CROCODILO': ['rio'],
+            'MACACO': ['savana', 'floresta'],
+            'GAZELA': ['savana'],
+            'HIPOPOTAMO': ['savana', 'rio']
         };
-        
+        return mapaBiomas[animal.toUpperCase()] || [];
     }
     
     
@@ -36,6 +41,18 @@ class RecintosZoo {
         if (quantidade <= 0) {
             return { erro: "Quantidade inválida" };
         }
+            
+        const { tamanho, biomas } = this.animaisPermitidos[animal];
+        const espacoNecessario = tamanho * quantidade;
+        
+        .filter(recinto => {
+            // Verifica se o bioma é adequado
+            if (!biomas.some(bioma => recinto.bioma.includes(bioma))) {
+                return false;
+            }
+        
+            return true;
+        })
     
     }
 
