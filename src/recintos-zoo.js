@@ -32,29 +32,40 @@ class RecintosZoo {
     
     
     
-    
-    analisaRecintos(animal, quantidade) {
-        if (!this.animaisPermitidos[animal]) {
-            return { erro: "Animal inválido" };
-        }
 
-        if (quantidade <= 0) {
-            return { erro: "Quantidade inválida" };
-        }
-            
-        const { tamanho, biomas } = this.animaisPermitidos[animal];
-        const espacoNecessario = tamanho * quantidade;
-        
+analisaRecintos(animal, quantidade) {
+    const biomas = this.biomasAdequados(animal);
+
+    // Verifica o erro para animal inválido
+    if (biomas.length === 0) {
+        return { erro: "Animal inválido" };
+    }
+
+    // Verifica o erro para quantidade inválida
+    if (quantidade <= 0) {
+        return { erro: "Quantidade inválida" };
+    }
+
+    const recintosViaveis = this.recintos
         .filter(recinto => {
             // Verifica se o bioma é adequado
             if (!biomas.some(bioma => recinto.bioma.includes(bioma))) {
                 return false;
             }
-        
-            return true;
+
+            // Calcula o espaço total ocupado no recinto
+            let espacoOcupado = recinto.animais.reduce((total, a) => total + (a.quantidade * a.tamanho), 0);
+
+            // Se houver mais de uma espécie, adicione 1 de espaço extra
+            if (recinto.animais.length > 0 && recinto.animais[0].especie !== animal.toUpperCase()) {
+                espacoOcupado += 1;
+            }
+
+            const espacoNecessario = quantidade * this.tamanhoAnimal(animal);
+
+            // Verifica se há espaço suficiente no recinto
+            return (recinto.tamanho - espacoOcupado) >= espacoNecessario;
         })
-    
-    }
 
 }
 
