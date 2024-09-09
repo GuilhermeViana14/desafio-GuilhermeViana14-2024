@@ -9,7 +9,6 @@ class RecintosZoo {
         ];
     }
 
-    // Função que retorna o tamanho do animal
     tamanhoAnimal(animal) {
         const tamanhos = {
             'MACACO': 1,
@@ -21,91 +20,93 @@ class RecintosZoo {
         return tamanhos[animal.toUpperCase()] || null;
     }
 
-    // Verifica se o animal é carnívoro
     AnimalCarnivoro(animal) {
         const carnivoros = ['LEAO', 'CROCODILO'];
         return carnivoros.includes(animal.toUpperCase());
     }
 
-    // Verifica se o bioma é adequado para o animal
     biomaAdequado(animal, bioma) {
-        if (animal === 'HIPOPOTAMO' && bioma !== 'savana e rio') return false;
-        return true;
+        const biomasPermitidos = {
+            'LEAO': ['savana'],
+            'LEOPARDO': ['savana'],
+            'CROCODILO': ['rio'],
+            'MACACO': ['savana', 'floresta', 'savana e rio'],
+            'GAZELA': ['savana', 'savana e rio'],
+            'HIPOPOTAMO': ['savana', 'rio', 'savana e rio']
+        };
+
+        return biomasPermitidos[animal.toUpperCase()] && biomasPermitidos[animal.toUpperCase()].includes(bioma);
     }
 
-    // Função principal que analisa os recintos viáveis
-    analisaRecintos(animal, quantidade) {
+    analisaRecintos(animal, quantidade, recintoEscolhido = null) {
         animal = animal.toUpperCase();
-
-        // Verifica se o animal é válido
+    
         if (!this.tamanhoAnimal(animal)) {
             return { erro: "Animal inválido", recintosViaveis: null };
         }
-
-        // Verifica se a quantidade é válida
+    
         if (quantidade <= 0) {
             return { erro: "Quantidade inválida", recintosViaveis: null };
         }
-
+    
+        const espacoAnimal = this.tamanhoAnimal(animal);
+        const isCarnivoro = this.AnimalCarnivoro(animal);
+    
         // Filtra os recintos viáveis
         const recintosViaveis = this.recintos
             .filter(recinto => {
-                // Verifica o bioma adequado para o animal
                 if (!this.biomaAdequado(animal, recinto.bioma)) {
                     return false;
                 }
-
-                // Verifica se o espaço é suficiente após a adição dos novos animais
+    
                 const espacoOcupado = recinto.animais.reduce((total, a) => total + (a.quantidade * a.tamanho), 0);
-                const espacoNecessario = quantidade * this.tamanhoAnimal(animal);
-                const espacoLivre = recinto.tamanho - espacoOcupado - espacoNecessario;
-
-                if (espacoLivre < 0) {
+                const espacoNecessario = quantidade * espacoAnimal;
+                const espacoLivre = recinto.tamanho - espacoOcupado;
+    
+                // O recinto é viável se o espaço livre é suficiente
+                if (espacoLivre < espacoNecessario) {
                     return false;
                 }
-
-                // Verifica se os animais carnívoros estão sozinhos
-                if (this.AnimalCarnivoro(animal) && recinto.animais.length > 0) {
+    
+                // Verifica se já existe um carnívoro ou herbívoro no recinto
+                const existeCarnivoro = recinto.animais.some(a => this.AnimalCarnivoro(a.especie));
+                if (isCarnivoro && existeCarnivoro) {
                     return false;
                 }
-
-                // Verifica se os animais no recinto continuarão confortáveis
-                for (let a of recinto.animais) {
-                    if (this.AnimalCarnivoro(a.especie) && animal !== a.especie) {
-                        return false;
-                    }
-
-                    // Verifica regra dos macacos
-                    if (animal === 'MACACO' && recinto.animais.length === 0) {
-                        return false;
-                    }
-
-                    if (a.especie === 'MACACO' && animal !== 'MACACO' && recinto.animais.length === 1) {
-                        return false;
-                    }
+                if (!isCarnivoro && existeCarnivoro) {
+                    return false;
                 }
-
+    
                 return true;
             })
             .map(recinto => {
-                // Calcula o espaço livre após adicionar o animal
                 const espacoOcupado = recinto.animais.reduce((total, a) => total + (a.quantidade * a.tamanho), 0);
-                const espacoLivre = recinto.tamanho - espacoOcupado - (quantidade * this.tamanhoAnimal(animal));
-
-                return `Recinto ${recinto.numero} (espaço livre: ${espacoLivre} total: ${recinto.tamanho})`;
-            })
-            .sort((a, b) => a.numero - b.numero); // Ordena pelo número do recinto
-
-        // Verifica se existem recintos viáveis
+                const espacoNecessario = quantidade * espacoAnimal;
+                const espacoLivre = recinto.tamanho - espacoOcupado - espacoNecessario;
+    
+                return { numero: recinto.numero, espacoLivre };
+            });
+        
+        if (recintoEscolhido) {
+            // Verifica se o recinto escolhido é um dos recintos viáveis
+            const recintoEscolhidoViavel = recintosViaveis.find(r => r.numero === recintoEscolhido);
+            if (recintoEscolhidoViavel) {
+                return { erro: null, recintosViaveis: [`Recinto ${recintoEscolhidoViavel.numero} (espaço livre: ${recintoEscolhidoViavel.espacoLivre} total: ${this.recintos.find(r => r.numero === recintoEscolhidoViavel.numero).tamanho})`] };
+            } else {
+                return { erro: "Recinto escolhido não é viável", recintosViaveis: null };
+            }
+        }
+    
+        // Retorna recintos viáveis normalmente se nenhum recinto específico for escolhido
         if (recintosViaveis.length === 0) {
             return { erro: "Não há recinto viável", recintosViaveis: null };
         }
-
-        return { erro: null, recintosViaveis };
+    
+        return {
+            erro: null,
+            recintosViaveis: recintosViaveis.map(r => `Recinto ${r.numero} (espaço livre: ${r.espacoLivre} total: ${this.recintos.find(re => re.numero === r.numero).tamanho})`)
+        };
     }
 }
 
-// Exemplo de uso
-const zoologico = new RecintosZoo();
-const resultado = zoologico.analisaRecintos('MACACO', 2);
-console.log(resultado);
+export { RecintosZoo };
