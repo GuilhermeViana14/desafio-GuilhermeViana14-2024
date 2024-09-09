@@ -17,7 +17,7 @@ class RecintosZoo {
     }
 
 
-    // Adiciona função para verificar biomas
+    //função para verificar biomas
     biomasAdequados(animal) {
         const mapaBiomas = {
             'LEAO': ['savana'],
@@ -56,14 +56,14 @@ analisaRecintos(animal, quantidade) {
             // Calcula o espaço total ocupado no recinto
             let espacoOcupado = recinto.animais.reduce((total, a) => total + (a.quantidade * a.tamanho), 0);
 
-            // Se houver mais de uma espécie, adicione 1 de espaço extra
+            // Se tiver mais de uma espécie adicione 1 de espaço extra
             if (recinto.animais.length > 0 && recinto.animais[0].especie !== animal.toUpperCase()) {
                 espacoOcupado += 1;
             }
 
             const espacoNecessario = quantidade * this.tamanhoAnimal(animal);
 
-            // Verifica se há espaço suficiente no recinto
+            // Verifica se tem espaço suficiente no recinto
             return (recinto.tamanho - espacoOcupado) >= espacoNecessario;
         })
 
@@ -73,10 +73,18 @@ analisaRecintos(animal, quantidade) {
             const espacoLivre = recinto.tamanho - espacoOcupado - (quantidade * this.tamanhoAnimal(animal));
 
             return `Recinto ${recinto.numero} (espaço livre: ${espacoLivre} total: ${recinto.tamanho})`;
-        })
+        });
+
+        // Verifica o erro para caso não haja recinto viável
+        if (recintosViaveis.length === 0) {
+            return { erro: "Não há recinto viável" };
+        }
+
+        return { recintosViaveis };
+    }
 
 }
 
-}
+
 
 export { RecintosZoo as RecintosZoo };
