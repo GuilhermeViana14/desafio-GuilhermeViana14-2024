@@ -29,6 +29,14 @@ class RecintosZoo {
     
     
     analisaRecintos(animal, quantidade) {
+        if (!this.animaisPermitidos[animal]) {
+            return { erro: "Animal inválido" };
+        }
+
+        if (quantidade <= 0) {
+            return { erro: "Quantidade inválida" };
+        }
+    
     }
 
 }
