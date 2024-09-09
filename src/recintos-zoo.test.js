@@ -40,7 +40,13 @@ describe('Recintos do Zoologico', () => {
         expect(resultado.recintosViaveis[0]).toBe('Recinto 3 (espaço livre: 3 total: 7)');
 
     });
-
+    
+    test('Deve colocar somente carnivoros da mesma especie', () => {
+        const resultado = new RecintosZoo().analisaRecintos('LEAO', 1, 5);
+        expect(resultado.erro).toBeFalsy();
+        expect(resultado.recintosViaveis.length).toBe(1); 
+        expect(resultado.recintosViaveis[0]).toBe('Recinto 5 (espaço livre: 3 total: 9)');
+    });
 
     test('Deve dar erro se colocar um herbivoro com um carnivoro', () => {
         const resultado = new RecintosZoo().analisaRecintos('GAZELA', 1, 5);
@@ -51,12 +57,6 @@ describe('Recintos do Zoologico', () => {
 
     });
 
-    test('Deve colocar somente carnivoros da mesma especie', () => {
-        const resultado = new RecintosZoo().analisaRecintos('LEAO', 1, 5);
-        expect(resultado.erro).toBeFalsy();
-        expect(resultado.recintosViaveis.length).toBe(1); 
-        expect(resultado.recintosViaveis[0]).toBe('Recinto 5 (espaço livre: 3 total: 9)');
-    });
     
     test('Deve dar erro ao colocar  carnivoros de  especies diferentes', () => {
         const resultado = new RecintosZoo().analisaRecintos('LEOPARDO', 1, 5);
@@ -90,4 +90,5 @@ describe('Recintos do Zoologico', () => {
         expect(resultado.recintosViaveis[0]).toBe('Recinto 1 (espaço livre: 3 total: 10)');
 
     });
+
 });
