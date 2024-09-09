@@ -13,6 +13,7 @@ class RecintosZoo {
         const tamanhos = {
             'MACACO': 1,
             'GAZELA': 2,
+            'LEOPARDO': 2,
             'LEAO': 3,
             'CROCODILO': 3,
             'HIPOPOTAMO': 4,
@@ -21,7 +22,7 @@ class RecintosZoo {
     }
 
     AnimalCarnivoro(animal) {
-        const carnivoros = ['LEAO', 'CROCODILO'];
+        const carnivoros = ['LEAO', 'CROCODILO', 'LEOPARDO'];
         return carnivoros.includes(animal.toUpperCase());
     }
 
@@ -70,11 +71,18 @@ class RecintosZoo {
     
                 // Verifica se já existe um carnívoro ou herbívoro no recinto
                 const existeCarnivoro = recinto.animais.some(a => this.AnimalCarnivoro(a.especie));
-                if (isCarnivoro && existeCarnivoro) {
-                    return false;
-                }
-                if (!isCarnivoro && existeCarnivoro) {
-                    return false;
+                
+                if (isCarnivoro) {
+                    // Permite carnívoros da mesma espécie no mesmo recinto
+                    const mesmaEspecie = recinto.animais.some(a => a.especie === animal);
+                    if (existeCarnivoro && !mesmaEspecie) {
+                        return false;
+                    }
+                } else {
+                    // Herbívoros não podem estar no mesmo recinto que carnívoros
+                    if (existeCarnivoro) {
+                        return false;
+                    }
                 }
     
                 return true;

@@ -52,4 +52,36 @@ describe('Recintos do Zoologico', () => {
         expect(resultado.recintosViaveis[0]).toBe('Recinto 5 (espaço livre: 4 total: 9)');
 
     });
+
+    test('Deve colocar somente carnivoros da mesma especie', () => {
+        const resultado = new RecintosZoo().analisaRecintos('LEAO', 1, 5);
+        expect(resultado.erro).toBeFalsy();
+        expect(resultado.recintosViaveis.length).toBe(1); 
+        expect(resultado.recintosViaveis[0]).toBe('Recinto 5 (espaço livre: 3 total: 9)');
+
+    });
+    
+    test('Deve dar erro ao colocar  carnivoros de  especies diferentes', () => {
+        const resultado = new RecintosZoo().analisaRecintos('LEOPARDO', 1, 5);
+        expect(resultado.erro).toBeFalsy();
+        expect(resultado.recintosViaveis.length).toBe(1); 
+        expect(resultado.recintosViaveis[0]).toBe('Recinto 5 (espaço livre: 4 total: 9)');
+
+    });
+
+    test('Deve dar erro ao colocar uma animal fora de seu bioma', () => {
+        const resultado = new RecintosZoo().analisaRecintos('LEOPARDO', 1, 4);
+        expect(resultado.erro).toBeFalsy();
+        expect(resultado.recintosViaveis.length).toBe(1); 
+        expect(resultado.recintosViaveis[0]).toBe('Recinto 4 (espaço livre: 8 total: 8)');
+
+    });
+
+    test('Deve dar erro ao colocar uma animal e nao possuir espaço', () => {
+        const resultado = new RecintosZoo().analisaRecintos('MACACO', 6, 2);
+        expect(resultado.erro).toBeFalsy();
+        expect(resultado.recintosViaveis.length).toBe(1); 
+        expect(resultado.recintosViaveis[0]).toBe('Recinto 2 (espaço livre: 0 total: 5)');
+
+    });
 });
