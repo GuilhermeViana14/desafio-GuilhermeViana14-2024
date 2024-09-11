@@ -42,67 +42,65 @@ class RecintosZoo {
     getRecintosViaveis(animal, quantidade) {
         const espacoAnimal = this.tamanhoAnimal(animal);
         const isCarnivoro = this.AnimalCarnivoro(animal);
-
+    
         const recintosViaveis = this.recintos
             .filter(recinto => {
                 if (!this.biomaAdequado(animal, recinto.bioma)) {
                     return false;
                 }
-
+    
                 const espacoOcupado = recinto.animais.reduce((total, a) => total + (a.quantidade * a.tamanho), 0);
                 const espacoNecessario = quantidade * espacoAnimal;
-                const espacoLivre = recinto.tamanho - espacoOcupado;
-
-                if (espacoLivre < espacoNecessario) {
+    
+                // Regra para espaço extra quando há mais de uma espécie no recinto
+                const numeroDeEspecies = new Set(recinto.animais.map(a => a.especie)).size;
+                const espacoExtra = (numeroDeEspecies > 0 ? 1 : 0); // Se já existe uma espécie, espaço extra é 1
+    
+                const espacoLivre = recinto.tamanho - espacoOcupado - espacoNecessario - espacoExtra;
+    
+                if (espacoLivre < 0) {
                     return false;
                 }
-
-                if (animal === 'HIPOPOTAMO') {
-                    if (recinto.bioma !== 'savana e rio' && recinto.animais.length > 0) {
-                        return false;
-                    }
-                }
-
+    
                 const existeCarnivoro = recinto.animais.some(a => this.AnimalCarnivoro(a.especie));
                 const existeHerbivoro = recinto.animais.some(a => !this.AnimalCarnivoro(a.especie));
-
+    
                 if (isCarnivoro && existeHerbivoro) {
                     return false;
                 }
-
+    
                 if (!isCarnivoro && existeCarnivoro) {
                     return false;
                 }
-
+    
                 if (isCarnivoro) {
                     const mesmaEspecie = recinto.animais.some(a => a.especie === animal);
                     if (existeCarnivoro && !mesmaEspecie) {
                         return false;
                     }
                 }
-
-                // Nova regra para hipopótamo
-                if (animal === 'HIPOPOTAMO' && recinto.animais.length > 0 && recinto.bioma !== 'savana e rio') {
-                    return false;
-                }
-
+    
                 return true;
             })
             .map(recinto => {
                 const espacoOcupado = recinto.animais.reduce((total, a) => total + (a.quantidade * a.tamanho), 0);
                 const espacoNecessario = quantidade * espacoAnimal;
-                const espacoLivre = recinto.tamanho - espacoOcupado - espacoNecessario;
-
+                const numeroDeEspecies = new Set(recinto.animais.map(a => a.especie)).size;
+                const espacoExtra = (numeroDeEspecies > 0 ? 1 : 0); // Se já existe uma espécie, espaço extra é 1
+    
+                const espacoLivre = recinto.tamanho - espacoOcupado - espacoNecessario - espacoExtra;
+    
                 return { numero: recinto.numero, espacoLivre };
             });
-
+    
         if (recintosViaveis.length === 0) {
             return "Não há recinto viável para alocar o animal.";
         }
-
+    
         return recintosViaveis
             .map(r => `Recinto ${r.numero} (espaço livre: ${r.espacoLivre} total: ${this.recintos.find(re => re.numero === r.numero).tamanho})`);
     }
+    
 
     analisaRecintos(animal, quantidade, recintoEscolhido = null) {
         animal = animal.toUpperCase();
