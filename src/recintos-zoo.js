@@ -106,34 +106,41 @@ class RecintosZoo {
 
     analisaRecintos(animal, quantidade, recintoEscolhido = null) {
         animal = animal.toUpperCase();
-
+    
+        // Regra para impedir que um macaco seja colocado sozinho
+        const isMacaco = animal === 'MACACO';
+    
+        if (isMacaco && quantidade === 1) {
+            // Continue o processamento, mas certifique-se de que o macaco não seja colocado sozinho
+        }
+    
         if (!this.tamanhoAnimal(animal)) {
             return { erro: "Animal inválido", recintosViaveis: [] };
         }
-
+    
         if (quantidade <= 0) {
             return { erro: "Quantidade inválida", recintosViaveis: [] };
         }
-
+    
         const espacoAnimal = this.tamanhoAnimal(animal);
         const isCarnivoro = this.AnimalCarnivoro(animal);
-
-        const recintosViaveis = this.recintos
+    
+        let recintosViaveis = this.recintos
             .filter(recinto => {
                 if (!this.biomaAdequado(animal, recinto.bioma)) {
                     return false;
                 }
-
+    
                 const espacoOcupado = recinto.animais.reduce((total, a) => total + (a.quantidade * a.tamanho), 0);
                 const espacoNecessario = quantidade * espacoAnimal;
                 const espacoLivre = recinto.tamanho - espacoOcupado;
-
+    
                 if (espacoLivre < espacoNecessario) {
                     return false;
                 }
-
+    
                 const existeCarnivoro = recinto.animais.some(a => this.AnimalCarnivoro(a.especie));
-
+    
                 if (isCarnivoro) {
                     const mesmaEspecie = recinto.animais.some(a => a.especie === animal);
                     if (existeCarnivoro && !mesmaEspecie) {
@@ -144,22 +151,28 @@ class RecintosZoo {
                         return false;
                     }
                 }
-
-                // Nova regra para hipopótamo
-                if (animal === 'HIPOPOTAMO' && recinto.animais.length > 0 && recinto.bioma !== 'savana e rio') {
-                    return false;
+    
+                // Nova regra para macaco: se quantidade == 1, pode ser colocado com outros macacos ou com herbívoros
+                if (isMacaco && quantidade === 1) {
+                    const outrosMacacosOuHerbivoros = recinto.animais.some(a => a.especie === 'MACACO' || !this.AnimalCarnivoro(a.especie));
+                    if (!outrosMacacosOuHerbivoros) {
+                        return false;
+                    }
                 }
-
+    
                 return true;
             })
             .map(recinto => {
                 const espacoOcupado = recinto.animais.reduce((total, a) => total + (a.quantidade * a.tamanho), 0);
                 const espacoNecessario = quantidade * espacoAnimal;
                 const espacoLivre = recinto.tamanho - espacoOcupado - espacoNecessario;
-
+    
                 return { numero: recinto.numero, espacoLivre };
             });
-
+    
+        // Ordenar os recintos viáveis pelo número do recinto
+        recintosViaveis = recintosViaveis.sort((a, b) => a.numero - b.numero);
+    
         if (recintoEscolhido) {
             const recintoEscolhidoViavel = recintosViaveis.find(r => r.numero === recintoEscolhido);
             if (recintoEscolhidoViavel) {
@@ -168,16 +181,17 @@ class RecintosZoo {
                 return { erro: "Recinto escolhido não é viável", recintosViaveis: this.getRecintosViaveis(animal, quantidade) };
             }
         }
-
+    
         if (recintosViaveis.length === 0) {
             return { erro: "Não há recinto viável", recintosViaveis: [] };
         }
-
+    
         return {
-            erro: null,
+            erro: isMacaco && quantidade === 1 ? "Macaco não pode ficar sozinho" : null,
             recintosViaveis: recintosViaveis.map(r => `Recinto ${r.numero} (espaço livre: ${r.espacoLivre} total: ${this.recintos.find(re => re.numero === r.numero).tamanho})`)
         };
     }
+    
+    
 }
-
 export { RecintosZoo as RecintosZoo };

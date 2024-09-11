@@ -90,5 +90,14 @@ describe('Recintos do Zoologico', () => {
         expect(resultado.recintosViaveis[0]).toBe('Recinto 1 (espaço livre: 3 total: 10)');
 
     });
+    
+    test('Deve dar erro ao tentar colocar 1 macaco sozinho', () => {
+        const resultado = new RecintosZoo().analisaRecintos('MACACO', 1);
+        expect(resultado.recintosViaveis).toBeFalsy()
+        expect(resultado.recintosViaveis[1]).toBe('Recinto 2 (espaço livre: 4 total: 5)');
+    });
+
+
+
 
 });
